@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <body>
+
+  <script src="/jquery-1.7.1.min.js"></script>
+  <script src="/d3.v2.min.js"></script>
+  <script src="js/dev.js"></script>
+  <script type="text/javascript">
+
+
+
+    evilGlobalState = {};
+    egs = evilGlobalState;
+
+    window.makeLegend = function(){
+       var d = egs.fill.domain();
+       var stuff = [];
+       for(var i = 0; i < d.length; i++){
+          stuff[i] = [d[i], egs.fill(d[i])];
+       }
+       d3.select("#container").append("div").selectAll("p")
+                          .data(stuff).enter().append("p")
+                          .text(function(d){ return d[0]})
+                          .attr( "style", function(d){
+       return "background-color:" +  d[1]});
+    };
+    window.initWorld = function(size, breaks){
+   
+    egs.scaleX = d3.scale.linear().domain([0, size]).range([0,1000]);
+    egs.scaleY = d3.scale.linear().domain([0, size]).range([0,1000]);
+
+    egs.fill = d3.scale.category20();
+    
+    d3.select("#container").select("svg").remove();
+    egs.vis =  d3.select("#container").append("svg")
+    .attr("width", 1000)
+    .attr("height", 1000)
+    .attr("class", "stuff")
+    .attr("style", "border: 1px green solid; background-color:black");
+
+    egs.vis.selectAll("line.xGrid").data(breaks).enter()
+    .append("line")
+        .attr(
+        {
+            "class":"horizontalGrid",
+            "x1" : 0,
+            "x2" : size,
+            "y1" : function(d){ return egs.scaleX(d);},
+            "y2" : function(d){ return egs.scaleX(d);},
+            "fill" : "none",
+            "shape-rendering" : "crispEdges",
+            "stroke" : "grey",
+            "stroke-width" : "1px"
+        });
+
+
+    egs.vis.selectAll("line.yGrid").data(breaks).enter()
+    .append("line")
+        .attr(
+        {
+            "class":"VertGrid",
+            "y1" : 0,
+            "y2" : size,
+            "x1" : function(d){ return egs.scaleX(d);},
+            "x2" : function(d){ return egs.scaleX(d);},
+            "fill" : "none",
+            "shape-rendering" : "crispEdges",
+            "stroke" : "grey",
+            "stroke-width" : "1px"
+        });
+
+
+    };
+
+    drawBirds = function(birds) {
+//    console.log(birds[0].col, birds[0].coords[0], birds[0].coords[1]);
+    var node = egs.vis.selectAll("g.node")
+    .data(birds)
+    .attr("transform", function(d) { return "translate(" + egs.scaleX(d.coords[0]) + "," + egs.scaleY(d.coords[1]) + ")"; })
+    .enter().append("g")
+    .attr("class", "node");
+
+    node.append("rect")
+    .attr("width", function(d) { return egs.scaleX(5); })
+    .attr("height", function(d) { return egs.scaleX(10); })
+
+     var rects = egs.vis.selectAll("g.node rect").data(birds);
+
+     rects
+      .attr("transform", function(d) { return "rotate("+ (360 - (d.heading/Math.PI * 180)) +")"; })
+      .style("fill", function(d, i) {  return egs.fill(d.col); });
+    }
+    
+    makeBird = function(id,x,y){
+       var bird = {};
+       bird.x = x;
+       bird.y = y;
+       bird.r = 3;
+       bird.id = id;
+       return bird;
+    }
+    fakeBirds = function(){
+        var birds = [makeBird("bob", 10,10), makeBird("frank", 50,50)];
+
+    return birds;
+
+    };
+  </script>
+  <div id="container"></div>
+  <canvas>
+    <g>
+      </g>
+  </canvas>
+  </body>
+</html>
