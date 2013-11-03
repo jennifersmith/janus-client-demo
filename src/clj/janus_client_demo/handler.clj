@@ -15,6 +15,7 @@
      (include-css "http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700")
      (include-css "/bootstrap/css/bootstrap.css")
      (include-js "http://codeorigin.jquery.com/jquery-2.0.3.min.js")
+     (include-js "http://cdnjs.cloudflare.com/ajax/libs/d3/3.3.9/d3.min.js")
      (include-js  "/bootstrap/js/bootstrap.min.js")
      (include-css "bootstrap/css/font-awesome.css")
 

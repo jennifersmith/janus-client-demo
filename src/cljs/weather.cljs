@@ -1,5 +1,5 @@
 (ns cljs.weather
-  (:require [domina :refer [ by-id log append! destroy-children! set-attr! remove-attr!]]
+  (:require [domina :refer [ by-id log append! destroy-children! set-attr! remove-attr! add-class! remove-class! destroy!]]
             [domina.css :refer [sel]]
             [domina.events :refer [listen! target]]
             [hiccups.runtime :as hiccupsrt]
@@ -7,12 +7,19 @@
             )
   (:require-macros [hiccups.core :as hiccups]))
 
+(def color-from-temp
+  (->
+   (.-scale js/d3)
+   (.quantize)
+   (.domain (clj->js [-5 45]))
+   (.range (clj->js (reverse ["#b2182b","#d6604d","#f4a582","#fddbc7","#f7f7f7","#d1e5f0","#92c5de","#4393c3","#2166ac"]) ))))
+
+;;
+
 (def endpoint "http://localhost:8787/cities")
 
 (hiccups/defhtml weather-template []      
   [:div
-    [:button {:class "go-button btn btn-primary btn-lg btn-block"}
-      "GO"]
    [:div {:class :container}
     [:h3 "What's the weather like?"]
     [:div {:class "container" :id :weather-results}]]])
@@ -28,7 +35,7 @@
 
 
 (hiccups/defhtml city-template [city]
-  [:div {:class "row col-md-offset-2 col-md-8 alert alert-block alert-info"}
+  [:div {:class "row col-md-offset-2 col-md-8 alert alert-block fade in out" :style (str "background-color:" (color-from-temp (get city "temp")))}
    [:div {:class :col-md-10}
     [:h4 (get city "name")]]
    [:div {:class :col-md-2}
@@ -36,7 +43,7 @@
 
 (hiccups/defhtml cities-template [cities]
   (vec
-   (concat [:div {:class "row"}]
+   (concat [:div {:class "row fade in out hide"}]
            (map city-template cities)))
 )
 
@@ -48,23 +55,21 @@
     (destroy-children! target)
     (append! target (error-template))))
 
-(defn load-weather [event]
+(defn load-weather [interval]
   (let [results (by-id "weather-results")
-        button (target event)
         success (fn [r] 
-                  (remove-attr! button :disabled)
-                  (destroy-children! results)
+                  (add-class! (sel results "div") "hide old")
                   (append! results (cities-template (get r "cities")))
+                  (destroy! (sel results ".old"))
+                  (remove-class! (sel results "div") "hide")
+                  (js/setTimeout #(load-weather interval) interval)
                   )]
-    (destroy-children! results)
-    (show-loading! results) 
-    (set-attr! button :disabled true)
     (GET endpoint {:handler success :error-handler (create-error-handler results)})))
 
 (defn init [root]
   (when-not (nil? root)
     (destroy-children! root)
     (append! root (weather-template))
-    (listen! (sel root ".go-button") :click load-weather)))
+    (load-weather 3000)))
 
 (init (by-id "weather-container"))
