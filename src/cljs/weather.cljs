@@ -1,5 +1,5 @@
 (ns cljs.weather
-  (:require [domina :refer [ by-id log append! destroy-children! set-attr!]]
+  (:require [domina :refer [ by-id log append! destroy-children! set-attr! remove-attr!]]
             [domina.css :refer [sel]]
             [domina.events :refer [listen! target]]
             [hiccups.runtime :as hiccupsrt]
@@ -15,16 +15,30 @@
       "GO"]
    [:div {:class :container}
     [:h3 "What's the weather like?"]
-    [:div {:id :weather-results}]]])
+    [:div {:class "container" :id :weather-results}]]])
 
 (hiccups/defhtml loading-template []      
-  [:div {:class "alert alert-info"} "Loading... be patient"])
+  [:div {:class "fade in out alert alert-warning"} "Loading... be patient"])
 
 (hiccups/defhtml error-template []      
-  [:div {:class "alert alert-block alert-danger fade in"} 
+  [:div {:class "alert alert-block alert-danger"} 
    [:button {:type :button :class :close :data-dismiss :alert}]
    [:h4 {:class "alert-heading"} "Oh no something happened!"]
    [:p "It's probably worth reloading the page as the author did not do great error handling."]])
+
+
+(hiccups/defhtml city-template [city]
+  [:div {:class "row col-md-offset-2 col-md-8 alert alert-block alert-info"}
+   [:div {:class :col-md-10}
+    [:h4 (get city "name")]]
+   [:div {:class :col-md-2}
+    [:h4 (get city "temp") " ºC"]]])
+
+(hiccups/defhtml cities-template [cities]
+  (vec
+   (concat [:div {:class "row"}]
+           (map city-template cities)))
+)
 
 (defn show-loading! [target] 
   (append! target (loading-template)))
@@ -37,7 +51,11 @@
 (defn load-weather [event]
   (let [results (by-id "weather-results")
         button (target event)
-        success (fn [r] (log "TODO RENDER RESULTS" r))]
+        success (fn [r] 
+                  (remove-attr! button :disabled)
+                  (destroy-children! results)
+                  (append! results (cities-template (get r "cities")))
+                  )]
     (destroy-children! results)
     (show-loading! results) 
     (set-attr! button :disabled true)
