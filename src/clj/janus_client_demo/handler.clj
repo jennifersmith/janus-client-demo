@@ -27,7 +27,7 @@
   [:div {:class "jumbotron" }
    [:div {:class "container"}
     [:h2 {:class "jumbotron-title"} "Weather Service"]
-    [:div {:id :weather-results}]
+    [:div {:id :weather-container}]
     ]]
 )
 (defroutes app-routes

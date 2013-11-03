@@ -10,6 +10,8 @@
                  [hiccup-bootstrap "0.1.2"]
                  [domina "1.0.2"]
                  [com.cemerick/piggieback "0.1.0"]
+                 [hiccups "0.2.0"]
+                 [cljs-ajax "0.2.1"]
                  ]
   :source-paths ["src/clj"]
 
@@ -23,7 +25,6 @@
                         :compiler {:output-to "resources/public/generated/dev.js"
                                    :optimizations :whitespace
                                    :pretty-print true}}
-
                        :prod
                        {:source-paths ["src/cljs"]
                         :compiler {:output-to "resources/public/generated/prod.js"
