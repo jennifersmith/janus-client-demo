@@ -35,9 +35,9 @@
 
 
 (hiccups/defhtml city-template [city]
-  [:div {:class "row col-md-offset-2 col-md-8 alert alert-block fade in out" :style (str "background-color:" (color-from-temp (get city "temp")))}
+  [:div {:class "row col-md-offset-2 col-md-8 alert alert-block fade in out" :style (str "font-weight:bold; color:#000000; background-color:" (color-from-temp (get city "temp")))}
    [:div {:class :col-md-10}
-    [:h4 (get city "name")]]
+    [:h4 (. (get city "name") toUpperCase)]]
    [:div {:class :col-md-2}
     [:h4 (get city "temp") " ºC"]]])
 
